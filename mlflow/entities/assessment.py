@@ -490,10 +490,10 @@ class IssueReference(Feedback):
     feedback that link traces to external issue tracking systems or bug reports.
 
     Args:
-        name: The issue identifier (e.g., "JIRA-123", "issue-456"). This is used as the
-            assessment name.
-        value: The feedback value associated with the issue. Typically a boolean or string
-            indicating the issue type.
+        name: A human-readable issue name or summary (e.g., "Incorrect output for edge case").
+            This is stored as the assessment name and is typically shown in UIs.
+        value: value: The external issue identifier (e.g., "issue-456") associated with
+            the issue reference. This is used for `issue.id`-based search and lookups.
         error: An optional error associated with the issue reference.
         rationale: The rationale / justification for the issue reference.
         source: The source of the assessment. If not provided, the default source is CODE.
@@ -515,8 +515,8 @@ class IssueReference(Feedback):
             from mlflow.entities import AssessmentSource, IssueReference
 
             issue = IssueReference(
-                name="JIRA-123",
-                value=True,
+                name="Incorrect output for edge case",
+                value="issue-456",
                 rationale="Trace shows incorrect output for edge case",
                 source=AssessmentSource(
                     source_type="HUMAN",

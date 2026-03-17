@@ -429,6 +429,7 @@ mlflow.entities.Issue.to_proto
 mlflow.entities.IssueReference
 mlflow.entities.IssueReference.from_dictionary
 mlflow.entities.IssueReference.from_proto
+mlflow.entities.IssueReference.to_proto
 mlflow.entities.IssueSeverity
 mlflow.entities.IssueStatus
 mlflow.entities.LifecycleStage
