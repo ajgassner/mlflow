@@ -123,6 +123,7 @@ def _annotate_issue_traces(
     rationale_map: dict[str, str],
     trace_lookup: dict[str, Trace],
     model: str,
+    run_id: str | None = None,
     trace_to_session: dict[str, str] | None = None,
     session_first_trace: dict[str, str] | None = None,
     token_counter: _TokenCounter | None = None,
@@ -185,6 +186,7 @@ def _annotate_issue_traces(
                 issue_id=item.issue.issue_id,
                 issue_name=item.issue.name,
                 source=source,
+                run_id=run_id,
                 rationale=annotation,
                 metadata=metadata,
             )
@@ -631,6 +633,7 @@ def discover_issues(
         rationale_map,
         trace_lookup,
         model,
+        run_id=run_id,
         trace_to_session=trace_to_session if use_conversation else None,
         session_first_trace=session_first_trace,
         token_counter=token_counter,
