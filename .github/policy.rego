@@ -152,6 +152,20 @@ deny_wrong_shell_defaults contains msg if {
 	)
 }
 
+deny_github_script_without_retries contains msg if {
+	some job_id, job in input.jobs
+	some step in job.steps
+	startswith(step.uses, "actions/github-script@")
+	not step["with"].retries
+	msg := sprintf(
+		concat("", [
+			"actions/github-script in job '%s' must have 'retries' set ",
+			"(e.g., retries: 3) for resilience against transient GitHub API failures.",
+		]),
+		[job_id],
+	)
+}
+
 deny_scheduled_workflow_without_repo_check contains msg if {
 	input["true"].schedule
 	not any_job_has_repo_check(input.jobs)
@@ -170,7 +184,33 @@ deny_push_without_branches contains msg if {
 	msg := "Push trigger must have a branches filter to avoid running on every branch."
 }
 
-###########################   RULE HELPERS   ##################################
+deny_interpolation_in_run contains msg if {
+	some job_id, job in input.jobs
+	some step in job.steps
+	regex.match(`\$\{\{`, step.run)
+	msg := sprintf(
+		concat("", [
+			"Direct ${{ }} interpolation in run block of job '%s'. ",
+			"Use env: to pass the value and reference it as $VAR in the script.",
+		]),
+		[job_id],
+	)
+}
+
+deny_interpolation_in_github_script contains msg if {
+	some job_id, job in input.jobs
+	some step in job.steps
+	startswith(step.uses, "actions/github-script@")
+	regex.match(`\$\{\{`, step["with"].script)
+	msg := sprintf(
+		concat("", [
+			"Direct ${{ }} interpolation in github-script of job '%s'. ",
+			"Use env: to pass the value and reference it as process.env.VAR in the script.",
+		]),
+		[job_id],
+	)
+}
+
 contains_github_token(value) if {
 	regex.match(`\$\{\{\s*github\.token\s*\}\}`, value)
 }
@@ -223,4 +263,25 @@ any_job_has_repo_check(jobs) if {
 
 job_has_repo_check(job) if {
 	regex.match(`github\.repository\s*==\s*'mlflow/`, job["if"])
+}
+
+deny_mutable_install contains msg if {
+	some job_id, job in input.jobs
+	some step in job.steps
+	regex.match(`\bnpm install\b`, step.run)
+	msg := sprintf(
+		"'npm install' in job '%s' modifies the lockfile. Use 'npm ci' for reproducible builds.",
+		[job_id],
+	)
+}
+
+deny_mutable_install contains msg if {
+	some job_id, job in input.jobs
+	some step in job.steps
+	regex.match(`\byarn install\b`, step.run)
+	not regex.match(`\byarn install\s+--immutable\b`, step.run)
+	msg := sprintf(
+		"'yarn install' in job '%s' may modify the lockfile. Use 'yarn install --immutable' for reproducible builds.",
+		[job_id],
+	)
 }

@@ -32,9 +32,9 @@ module.exports = async ({ github, context }) => {
     // Returns true if newRun should replace existingRun
     if (!existingRun) return true;
 
-    // If they are different workflow runs, prefer the one created later
+    // If they are different workflow runs, prefer the one with a higher ID (auto-incrementing)
     if (newRun.id !== existingRun.id) {
-      return new Date(newRun.created_at) > new Date(existingRun.created_at);
+      return newRun.id > existingRun.id;
     }
 
     // Same workflow run: higher run_attempt takes priority (re-runs)
@@ -81,7 +81,13 @@ module.exports = async ({ github, context }) => {
         repo,
         head_sha: ref,
       })
-    ).filter(({ path }) => path !== ".github/workflows/protect.yml");
+    ).filter(
+      ({ path, event }) =>
+        // Exclude this workflow to avoid self-checking
+        path !== ".github/workflows/protect.yml" &&
+        // Exclude dynamic workflows (GitHub-managed, e.g., Copilot code review)
+        event !== "dynamic"
+    );
 
     // Deduplicate workflow runs by path and event, keeping the latest attempt
     const latestRuns = {};
