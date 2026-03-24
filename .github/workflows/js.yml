@@ -5,6 +5,7 @@ on:
     paths:
       - mlflow/server/js/**
       - .github/workflows/js.yml
+      - .github/actions/setup-node/action.yml
     branches:
       - master
       - branch-[0-9]+.[0-9]+
@@ -16,6 +17,7 @@ on:
     paths:
       - mlflow/server/js/**
       - .github/workflows/js.yml
+      - .github/actions/setup-node/action.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
