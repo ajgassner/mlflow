@@ -5,6 +5,14 @@ from inspect import isclass
 from typing import Any, Final, TypedDict
 
 import polars as pl
+from packaging.version import Version
+
+if Version(pl.__version__) < Version("1.0"):
+    raise ImportError(
+        f"MLflow's polars integration requires polars >= 1.0, but polars "
+        f"{pl.__version__} is installed. Please upgrade polars: `pip install 'polars>=1'`."
+    )
+
 from polars.datatypes.classes import DataType as PolarsDataType
 from polars.datatypes.classes import DataTypeClass as PolarsDataTypeClass
 
