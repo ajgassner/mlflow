@@ -350,10 +350,21 @@ def detach_span_from_context(token: contextvars.Token):
     Args:
         token: The token returned by `_set_span_to_active` function.
     """
-    if MLFLOW_USE_DEFAULT_TRACER_PROVIDER.get():
-        mlflow_runtime_context.detach(token)
-    else:
-        context_api.detach(token)
+    try:
+        if MLFLOW_USE_DEFAULT_TRACER_PROVIDER.get():
+            mlflow_runtime_context.detach(token)
+        else:
+            context_api.detach(token)
+    except ValueError:
+        # This can happen in async scenarios (e.g., LangChain's ainvoke) where the callback
+        # that ends a span runs in a different asyncio context than the one that started it.
+        # Python's ContextVar.reset() raises ValueError when the token was created in a
+        # different context. Since the span is already ended, we can safely ignore this.
+        _logger.debug(
+            "Failed to detach span from context. This can happen when async callbacks "
+            "run in a different asyncio context than where the span was originally attached.",
+            exc_info=True,
+        )
 
 
 def set_destination(destination: TraceLocationBase, *, context_local: bool = False):

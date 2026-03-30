@@ -262,14 +262,13 @@ class MlflowLangchainTracer(BaseCallbackHandler, metaclass=ExceptionSafeAbstract
                     status=status,
                 )
         finally:
-            # Span should be detached from the context even when the client.end_span fails
+            # Span should be detached from the context even when the client.end_span fails.
+            # NB: We check st.token directly rather than _should_attach_span_to_context.get(),
+            # because in async scenarios (e.g., LangChain's ainvoke), the end callback can run
+            # in a different asyncio context than the start callback. The ContextVar value may
+            # differ between the two contexts, so we rely solely on whether a token was stored.
             st = self._run_span_mapping.pop(str(run_id), None)
-            if _should_attach_span_to_context.get():
-                if st.token is None:
-                    raise MlflowException(
-                        f"Token for span {st.span} is not found. "
-                        "Cannot detach the span from context."
-                    )
+            if st is not None and st.token is not None:
                 detach_span_from_context(st.token)
 
     def flush(self):

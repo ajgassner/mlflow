@@ -1,3 +1,4 @@
+import contextvars
 import random
 import time
 import uuid
@@ -514,6 +515,33 @@ def test_tracer_thread_safe():
     traces = get_traces()
     assert len(traces) == 10
     assert all(len(trace.data.spans) == 1 for trace in traces)
+
+
+def test_tracer_does_not_raise_on_different_async_context():
+    """
+    Test that the tracer handles on_chain_start and on_chain_end being called
+    in different asyncio contexts without raising ValueError.
+
+    This simulates LangChain's ainvoke behavior where callbacks may run in
+    different asyncio task contexts, causing ContextVar token mismatch errors.
+    """
+    tracer = MlflowLangchainTracer()
+    run_id = str(uuid.uuid4())
+
+    # Create two separate context copies to simulate different asyncio task contexts
+    ctx_start = contextvars.copy_context()
+    ctx_end = contextvars.copy_context()
+
+    # Run on_chain_start in ctx_start (simulating the context where the span is attached)
+    ctx_start.run(tracer.on_chain_start, {}, {"input": "test"}, run_id=run_id, name="chain")
+
+    # Run on_chain_end in ctx_end (different context, simulates async task context switch).
+    # This should NOT raise ValueError: <Token ...> was created in a different Context.
+    ctx_end.run(tracer.on_chain_end, {"output": "result"}, run_id=run_id)
+
+    traces = get_traces()
+    assert len(traces) == 1
+    assert traces[0].info.status == "OK"
 
 
 def test_tracer_does_not_add_spans_to_trace_after_root_run_has_finished():
