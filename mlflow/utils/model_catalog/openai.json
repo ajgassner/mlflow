@@ -134,8 +134,8 @@
         "max_tokens": 4096
       },
       "pricing": {
-        "input_per_token": 1e-5,
-        "output_per_token": 3e-5
+        "input_per_token": 1e-05,
+        "output_per_token": 3e-05
       },
       "capabilities": {
         "function_calling": true,
@@ -154,8 +154,8 @@
         "max_tokens": 4096
       },
       "pricing": {
-        "input_per_token": 3e-5,
-        "output_per_token": 6e-5
+        "input_per_token": 3e-05,
+        "output_per_token": 6e-05
       },
       "capabilities": {
         "function_calling": false,
@@ -174,8 +174,8 @@
         "max_tokens": 4096
       },
       "pricing": {
-        "input_per_token": 3e-5,
-        "output_per_token": 6e-5
+        "input_per_token": 3e-05,
+        "output_per_token": 6e-05
       },
       "capabilities": {
         "function_calling": true,
@@ -194,8 +194,8 @@
         "max_tokens": 4096
       },
       "pricing": {
-        "input_per_token": 1e-5,
-        "output_per_token": 3e-5
+        "input_per_token": 1e-05,
+        "output_per_token": 3e-05
       },
       "capabilities": {
         "function_calling": true,
