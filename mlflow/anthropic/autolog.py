@@ -188,8 +188,7 @@ def _parse_usage(output: Any) -> dict[str, int] | None:
             # Anthropic reports input_tokens excluding cache tokens. Normalize to
             # include them, consistent with OpenAI/Gemini and cost_per_token().
             # Same logic as _normalize_anthropic_input_tokens in gateway/providers/anthropic.py.
-            cache_total = (cached or 0) + (created or 0)
-            if cache_total:
+            if cache_total := (cached or 0) + (created or 0):
                 usage_dict[TokenUsageKey.INPUT_TOKENS] += cache_total
                 usage_dict[TokenUsageKey.TOTAL_TOKENS] += cache_total
             return usage_dict
